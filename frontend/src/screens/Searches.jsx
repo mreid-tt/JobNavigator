@@ -49,6 +49,7 @@ const MODES = {
   linkedin_personal: ['LINKEDIN PERSONAL', 'sm-lipersonal'],
   jobright: ['JOBRIGHT.AI', 'sm-jobright'],
   freehire: ['FREEHIRE.ME', 'sm-freehire'],
+  trulyremote: ['TRULYREMOTEWORK.COM', 'sm-trulyremote'],
   linkedin_extension: ['EXTENSION', 'sm-extension'],
   extension: ['EXTENSION', 'sm-extension'],
 }
@@ -58,13 +59,14 @@ const MODE_OPTIONS = [
   ['linkedin_personal', 'LinkedIn Personal'],
   ['jobright', 'Jobright.ai'],
   ['freehire', 'freehire.me'],
+  ['trulyremote', 'TrulyRemoteWork.com'],
 ]
 // /monitor/active carries every background job; only POST /searches/{id}/run
 // tags its run with job_type 'search_run' (routes_searches.py) — filter on that.
 const isSearchRun = (r) => r?.job_type === 'search_run'
 const EXT_MODES = ['linkedin_extension', 'extension']
 const isExt = (m) => EXT_MODES.includes(m)
-const TESTABLE = ['keyword', 'levels_fyi', 'linkedin_personal', 'jobright', 'freehire']
+const TESTABLE = ['keyword', 'levels_fyi', 'linkedin_personal', 'jobright', 'freehire', 'trulyremote']
 
 // A Test run is invisible to the run monitor: `POST /searches/{id}/test` runs the
 // keyword modes inline and the slow ones through a bare asyncio task into a
@@ -101,6 +103,7 @@ const noteFor = (mode) => {
   if (mode === 'keyword') return ['Listings link to the board (LinkedIn, Indeed, ZipRecruiter, Google), not to the company’s own page. The same job found later by a company scrape or the extension is only recognised as a duplicate when company and title match exactly.', 'sm-keyword']
   if (mode === 'levels_fyi') return ['Set your filters on levels.fyi and paste the URL here. The URL contains location, job family, salary and date filters.', 'sm-levels']
   if (mode === 'jobright') return ['Recommendations from your Jobright.ai account. Enter a search term to search instead. Credentials are in Settings › Accounts.', 'sm-jobright']
+  if (mode === 'trulyremote') return ['Reads TrulyRemoteWork.com’s full corpus of worldwide-remote roles. Every listing is remote with no location restriction, so you narrow it with the title filters below.', 'sm-trulyremote']
   if (mode === 'extension') return ['Jobs come from the “Save to Job Feed” button on any website. The filters and auto-score depth below apply to each job as it is saved.', 'sm-levels']
   if (mode === 'linkedin_extension') return ['Jobs are captured while you browse linkedin.com/jobs/collections pages. The filters below are applied on import.', 'sm-levels']
   return null
@@ -132,6 +135,7 @@ const summaryOf = (s) => {
     if (s.direct_url) bits.push(short(s.direct_url))
     return (bits.join(' · ') || 'freehire.me') + last
   }
+  if (m === 'trulyremote') return `Worldwide remote · max ${s.results_wanted || 100}${last}`
   return `${short(s.direct_url) || 'no URL'}${last}`
 }
 
@@ -299,6 +303,10 @@ function ConfigForm({ d, set }) {
       <Cell key="url" label="freehire.me URL · filters forwarded" mono span={2} value={d.direct_url} onChange={(v) => set({ direct_url: v })}
         placeholder="https://freehire.me/?role=backend&seniority=senior&countries=us"
         sub="Role, seniority, countries and posting age are taken from the URL as is" />,
+      <Cell key="rw" label="Results wanted · 1–500" mono type="number" min={BOUNDS.results_wanted[0]} max={BOUNDS.results_wanted[1]} value={d.results_wanted} onChange={(v) => set({ results_wanted: v })} />,
+    )
+  } else if (m === 'trulyremote') {
+    fields.push(
       <Cell key="rw" label="Results wanted · 1–500" mono type="number" min={BOUNDS.results_wanted[0]} max={BOUNDS.results_wanted[1]} value={d.results_wanted} onChange={(v) => set({ results_wanted: v })} />,
     )
   }
@@ -837,6 +845,9 @@ function TestModal({ test, tab, setTab, onClose }) {
   } else if (cfg.mode === 'freehire') {
     if (cfg.search_term) params.push(`“${cfg.search_term}”`)
     if (cfg.direct_url) params.push(short(cfg.direct_url, 60))
+    if (cfg.results_wanted) params.push(`${cfg.results_wanted} wanted`)
+  } else if (cfg.mode === 'trulyremote') {
+    params.push('worldwide remote')
     if (cfg.results_wanted) params.push(`${cfg.results_wanted} wanted`)
   } else {
     if (cfg.location) params.push(cfg.location)
