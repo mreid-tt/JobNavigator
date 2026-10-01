@@ -114,7 +114,7 @@ def create_search(data: SearchCreate, db: Session = Depends(get_db)):
     payload = data.model_dump()
     payload["country"] = _validated_country(payload["country"])
     # Only a keyword (JobSpy) search composes location with country; for the URL-driven modes
-    # (Jobright, Levels.fyi, freehire, caribbeanjobs, LinkedIn Personal) country means nothing and must not reject a row.
+    # (Jobright, Levels.fyi, freehire, caribbeanjobs, trulyremote, LinkedIn Personal) country means nothing and must not reject a row.
     if payload.get("search_mode", "keyword") == "keyword":
         payload["location"] = _validated_location(payload["location"], payload["country"])
     search = Search(**payload)
@@ -247,12 +247,12 @@ async def trigger_search(search_id: str, auto_score: bool = None, db: Session = 
 
 @router.post("/{search_id}/test")
 async def test_search(search_id: str, db: Session = Depends(get_db)):
-    """Run a search test: keyword mode runs synchronously and returns results directly, while slow modes (levels_fyi, linkedin_personal, jobright, freehire, caribbeanjobs) launch in the background and return a run_id to poll."""
+    """Run a search test: keyword mode runs synchronously and returns results directly, while slow modes (levels_fyi, linkedin_personal, jobright, freehire, caribbeanjobs, trulyremote) launch in the background and return a run_id to poll."""
     search = db.query(Search).filter(Search.id == search_id).first()
     if not search:
         raise HTTPException(status_code=404, detail="Search not found")
 
-    if search.search_mode in ("levels_fyi", "linkedin_personal", "jobright", "freehire", "caribbeanjobs"):
+    if search.search_mode in ("levels_fyi", "linkedin_personal", "jobright", "freehire", "caribbeanjobs", "trulyremote"):
         run_id = str(uuid.uuid4())[:8]
         _test_results[run_id] = {"status": "running", "result": None}
 
@@ -276,6 +276,9 @@ async def test_search(search_id: str, db: Session = Depends(get_db)):
                 elif search.search_mode == "caribbeanjobs":
                     from backend.scraper.sources.caribbeanjobs import preview as test_caribbeanjobs
                     result = await test_caribbeanjobs(test_search_obj, test_db)
+                elif search.search_mode == "trulyremote":
+                    from backend.scraper.sources.trulyremote import preview as test_trulyremote
+                    result = await test_trulyremote(test_search_obj, test_db)
                 else:
                     from backend.scraper.sources.linkedin_personal import preview as test_linkedin_personal
                     result = await test_linkedin_personal(test_search_obj, test_db)
@@ -290,7 +293,7 @@ async def test_search(search_id: str, db: Session = Depends(get_db)):
         return JSONResponse(status_code=202, content={"run_id": run_id, "status": "running"})
 
     if search.search_mode != "keyword":
-        raise HTTPException(status_code=400, detail="Test only supports keyword, levels_fyi, linkedin_personal, jobright, freehire, and caribbeanjobs searches")
+        raise HTTPException(status_code=400, detail="Test only supports keyword, levels_fyi, linkedin_personal, jobright, freehire, caribbeanjobs, and trulyremote searches")
 
     # ── Keyword (JobSpy) test — runs synchronously ──
     import re

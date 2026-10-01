@@ -37,6 +37,7 @@ const SOURCE_COLORS = {
   jobright: 'bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-300',
   freehire: 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300',
   caribbeanjobs: 'bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-300',
+  trulyremote: 'bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-300',
 }
 
 const DEFAULT_FORM = {
@@ -243,6 +244,7 @@ export default function SearchManager() {
               <option value="jobright">Jobright.ai</option>
               <option value="freehire">freehire.me</option>
               <option value="caribbeanjobs">CaribbeanJobs.com</option>
+              <option value="trulyremote">TrulyRemoteWork.com</option>
             </select>
           )}
         </div>
@@ -348,6 +350,17 @@ export default function SearchManager() {
                 min={1} className="border rounded px-2 py-1.5 text-sm w-full dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600" />
             </div>
           </>
+        ) : ed.search_mode === 'trulyremote' ? (
+          <>
+            <div className="col-span-2">
+              <p className="text-[11px] text-gray-400 dark:text-gray-500">Reads TrulyRemoteWork.com’s full corpus of worldwide-remote roles. Every listing is remote with no location restriction; narrow it with the title filters below.</p>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Results Wanted</label>
+              <input type="number" value={ed.results_wanted} onChange={e => setEd({ results_wanted: parseInt(e.target.value) || 100 })}
+                min={1} className="border rounded px-2 py-1.5 text-sm w-full dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600" />
+            </div>
+          </>
         ) : (
           <div className={ed.search_mode === 'levels_fyi' ? 'col-span-2' : ''}>
             <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
@@ -367,7 +380,7 @@ export default function SearchManager() {
               min={1} max={100} className="border rounded px-2 py-1.5 text-sm w-full dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600" />
           </div>
         )}
-        {ed.search_mode !== 'levels_fyi' && ed.search_mode !== 'linkedin_personal' && ed.search_mode !== 'jobright' && ed.search_mode !== 'freehire' && ed.search_mode !== 'caribbeanjobs' && !isExtensionMode(ed.search_mode) && (
+        {ed.search_mode !== 'levels_fyi' && ed.search_mode !== 'linkedin_personal' && ed.search_mode !== 'jobright' && ed.search_mode !== 'freehire' && ed.search_mode !== 'caribbeanjobs' && ed.search_mode !== 'trulyremote' && !isExtensionMode(ed.search_mode) && (
           <>
             <div>
               <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Location</label>
@@ -521,7 +534,7 @@ export default function SearchManager() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Search Manager</h1>
           <InfoTip title="Search Manager">
             Saved job searches that run on a schedule. Each has a <b>mode</b>: keyword boards (JobSpy),
-            Levels.fyi, LinkedIn Personal, Jobright.ai, freehire.me, CaribbeanJobs.com, plus the two passive Chrome-extension
+            Levels.fyi, LinkedIn Personal, Jobright.ai, freehire.me, CaribbeanJobs.com, TrulyRemoteWork.com, plus the two passive Chrome-extension
             captures. Use the <b>flask</b> icon to dry-run (preview + per-job filter diagnostics without
             saving) and <b>Play</b> to run now. Per-search interval, title/company filters, and auto-score
             are configurable.
@@ -767,8 +780,9 @@ export default function SearchManager() {
                     s.search_mode === 'jobright' ? 'bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-300' :
                     s.search_mode === 'freehire' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300' :
                     s.search_mode === 'caribbeanjobs' ? 'bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-300' :
+                    s.search_mode === 'trulyremote' ? 'bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-300' :
                     s.search_mode === 'url' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
-                  }`}>{s.search_mode === 'levels_fyi' ? 'Levels.fyi' : s.search_mode === 'linkedin_personal' ? 'LinkedIn Personal' : s.search_mode === 'linkedin_extension' ? 'Extension LI' : s.search_mode === 'extension' ? 'Extension' : s.search_mode === 'jobright' ? 'Jobright.ai' : s.search_mode === 'freehire' ? 'freehire.me' : s.search_mode === 'caribbeanjobs' ? 'CaribbeanJobs.com' : s.search_mode === 'keyword' ? 'JobSpy' : s.search_mode}</span>
+                  }`}>{s.search_mode === 'levels_fyi' ? 'Levels.fyi' : s.search_mode === 'linkedin_personal' ? 'LinkedIn Personal' : s.search_mode === 'linkedin_extension' ? 'Extension LI' : s.search_mode === 'extension' ? 'Extension' : s.search_mode === 'jobright' ? 'Jobright.ai' : s.search_mode === 'freehire' ? 'freehire.me' : s.search_mode === 'caribbeanjobs' ? 'CaribbeanJobs.com' : s.search_mode === 'trulyremote' ? 'TrulyRemoteWork.com' : s.search_mode === 'keyword' ? 'JobSpy' : s.search_mode}</span>
                 </div>
                 {editing !== s.id && (
                   <div className="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -812,7 +826,7 @@ export default function SearchManager() {
                       <span className="text-[10px] text-amber-600 dark:text-amber-400" title={configError(s)}>{configError(s)}</span>
                     )}
                     {!isExtensionMode(s.search_mode) && (
-                      <button onClick={() => testSearch(s.id)} disabled={testing === s.id || !!configError(s) || !['keyword', 'levels_fyi', 'linkedin_personal', 'jobright', 'freehire', 'caribbeanjobs'].includes(s.search_mode)}
+                      <button onClick={() => testSearch(s.id)} disabled={testing === s.id || !!configError(s) || !['keyword', 'levels_fyi', 'linkedin_personal', 'jobright', 'freehire', 'caribbeanjobs', 'trulyremote'].includes(s.search_mode)}
                         className="p-1.5 rounded hover:bg-amber-50 dark:hover:bg-amber-900/30 text-amber-600 dark:text-amber-400 disabled:opacity-40" title={configError(s) || 'Test Search (dry run)'}>
                         {testing === s.id ? <Loader2 size={16} className="animate-spin" /> : <FlaskConical size={16} />}
                       </button>
