@@ -87,7 +87,7 @@ OPENAPI_TAGS = [
     {"name": "system", "description": "Health check and system info"},
 ]
 
-APP_VERSION = "2.1.0"  # released version; shown in Settings and on /health
+APP_VERSION = "2.2.0"  # released version; shown in Settings and on /health
 
 app = FastAPI(
     title="JobNavigator API",

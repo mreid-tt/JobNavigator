@@ -7,7 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [2.2.0] — 2026-10-04
+
+Upgrade: `git pull && docker compose pull && docker compose up -d` (or `--build`); reload the extension. The backend image now pins Claude Code 2.1.281 and Codex 0.156.1.
+
 ### Added
+- **LinkedIn mock account is optional** (by @volkotyk, #20): Settings › LinkedIn gets a "Use a mock account" switch; with it off the session refresh signs in with the personal account. A database that already holds mock credentials keeps using them. A mock login now clears the personal scraper's cookies first, so it can no longer save the personal session as the mock one.
 - **Modern Professional résumé template** (by @Mohith1-stack, #18): a ninth PDF template, Arial with a ruled header, no external font load.
 - **Reasoning effort per model** (by @volkotyk): the Primary, the scoring fallback and every per-feature override take a reasoning effort beside the model. Claude API sends `output_config.effort`, Claude Code `--effort`, Codex CLI `model_reasoning_effort`, OpenAI `reasoning_effort` and OpenRouter `reasoning.effort`; each picker offers only its provider's values (`GET /api/llm/efforts`). Empty keeps the model's default; an override on the Primary's provider inherits the Primary's effort. Antigravity CLI keeps the effort in the model name.
 - **Current models** (by @volkotyk): Claude Opus 5.5 and Claude Fable 5.1 (Claude API, Claude Code, OpenRouter); GPT-6 Astra, Sol and Luna (OpenAI, Codex CLI, OpenRouter); GPT-5.6 Sol/Terra/Luna and GPT-5.5 on the OpenAI API; Gemini 3.8 Flash and 3.1 Pro on OpenRouter, with prices for the new API models. For new installs the list drops `gpt-5.3-codex` (Responses API only, so Chat Completions cannot call it), and `o3-mini`, `o4-mini` and `openai/o4-mini-high` (shut down 2026-10-23). An existing model list keeps these models.
@@ -22,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Frontend port 3000 is no longer published**; the dashboard is reached through Caddy on port 80 only (a host port there served nothing and could clash with ranges Windows reserves for Hyper-V).
 
 ### Fixed
+- **Multi-page résumé PDFs** (by @funstuie-bit, #19): page gutters live in `@page`, so page 2 onward no longer starts at the paper edge. A résumé that ended within a few lines of a page may now take one more page.
+- **Scrape health alerts** (by @volkotyk, #21): only a source that ran in this scrape can alert, so a paused search no longer pages after every run.
 - **Cover-letter PDFs** get the same fix as résumés in #19: page 2 of a long letter no longer starts at the paper edge; every page carries the template's own gutters.
 - **Reasoning headroom only where it is needed:** OpenAI and OpenRouter get the 16,000-token headroom only when an effort is set, so gpt-4o and other small-ceiling models keep working with the default; Claude API keeps it by default. **Scrape health** pages Telegram only when a source failed or found nothing three runs running; one quiet board among several stays in the run summary and the health panel.
 - **A Claude model that thinks no longer fails the call:** Sonnet 5, Opus 5.5 and Fable 5.1 can put a thinking block before the answer, and the pinned SDK reads that block as text `None`. The reply is now the text blocks only.
@@ -175,7 +184,8 @@ replies, and manage it all from a React dashboard.
 - **Dashboard:** React + Tailwind (dark mode), keyboard-driven Job Feed, editable
   settings (LLM providers/models, rubric, filters) — only secrets live in `.env`.
 
-[Unreleased]: https://github.com/vesaias/JobNavigator/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/vesaias/JobNavigator/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/vesaias/JobNavigator/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/vesaias/JobNavigator/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/vesaias/JobNavigator/compare/v1.1.0...v2.0.0
 [1.1.0]: https://github.com/vesaias/JobNavigator/compare/v1.0.0...v1.1.0
